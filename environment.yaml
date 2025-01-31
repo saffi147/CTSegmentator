@@ -1,0 +1,21 @@
+name: CT_segmentator
+channels:   # this is where conda looks for the packages
+  - conda-forge
+  - defaults
+
+dependencies: 
+  - python=3.8
+  - pip
+  - SimpleITK
+  - nibabel>=2.3.0
+  - tqdm>=4.45.0
+  - pyarrow
+  - pydicom
+  - dicom2nifti
+  - pip:pip
+      - torch>=2.1.2
+      - nnunetv2>=2.2.1
+      - numpy==1.19.2
+      - p_tqdm
+      - xvfbwrapper
+      - dicom
