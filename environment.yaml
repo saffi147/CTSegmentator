@@ -1,21 +1,24 @@
-name: CT_segmentator
+name: CTSegmentator
 channels:   # this is where conda looks for the packages
   - conda-forge
   - defaults
 
 dependencies: 
-  - python=3.8
+  - python=3.10
   - pip
   - SimpleITK
   - nibabel>=2.3.0
   - tqdm>=4.45.0
   - pyarrow
   - pydicom
-  - dicom2nifti
-  - pip:pip
-      - torch>=2.1.2
-      - nnunetv2>=2.2.1
-      - numpy==1.19.2
-      - p_tqdm
-      - xvfbwrapper
-      - dicom
+  - requests 
+  - ipykernel
+  - Pillow=11.1.0
+  - pip:
+    - torch>=2.1.2
+    - nnunetv2>=2.2.1
+    - numpy>2
+    - p_tqdm
+    - xvfbwrapper
+    - rt_utils
+

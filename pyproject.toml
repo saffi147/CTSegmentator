@@ -3,14 +3,13 @@ requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "ct_segmentator"
+name = "CTSegmentator"
 version = "0.0.1"
 description = "CT Auto-Segmentation Tool"
 readme = "README.md"
-requires-python = ">=3.8"
-license = { file = "LICENSE" }
+requires-python = ">=3.10"
 authors = [
-    { name = "Saffi Hunt"}
+    { name = "Saffi Hunt" }
 ]
 dependencies = [
     "torch>=2.1.2",
@@ -27,13 +26,12 @@ dependencies = [
     "dicom2nifti",
     "pyarrow",
     "pydicom",
-    "TotalSegmentator==2.4.0"
 ]
 
 [project.scripts]
-psma-segmentator = "ct_segmentator.cli:main"
+psma-segmentator = "psma_segmentator.cli:main"
 
 [project.urls]
-"Homepage" = "https://github.com/yourusername/ct_segmentator"
-"Repository" = "https://github.com/yourusername/ct_segmentator"
-"Bug Tracker" = "https://github.com/yourusername/ct_segmentator/issues"
+"Homepage" = "https://github.com/yourusername/psma_segmentator"
+"Repository" = "https://github.com/yourusername/psma_segmentator"
+"Bug Tracker" = "https://github.com/yourusername/psma_segmentator/issues"

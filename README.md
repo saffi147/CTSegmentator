@@ -10,4 +10,12 @@ conda env create -f environment.yml
 conda activate CT_segmentator
 ```
 
+To update the conda environment once already created, run the following:
+
+```
+conda activate CT_Segmentator
+conda env update --file environment.yaml --prune
+```
+
+How to use: 
 
