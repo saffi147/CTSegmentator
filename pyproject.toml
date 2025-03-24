@@ -12,26 +12,17 @@ authors = [
     { name = "Saffi Hunt" }
 ]
 dependencies = [
-    "torch>=2.1.2",
-    "numpy<2",
-    "SimpleITK",
-    "nibabel>=2.3.0",
-    "tqdm>=4.45.0",
-    "p_tqdm",
-    "xvfbwrapper",
-    "nnunetv2>=2.2.1",
-    "requests==2.27.1; python_version<'3.10'",
-    "requests; python_version>='3.10'",
-    "rt_utils",
-    "dicom2nifti",
-    "pyarrow",
+    "torch>=2.1.2",   
     "pydicom",
+    "pathlib",
+    "acvl_utils",
+    "tqdm",
+    "dynamic_network_architectures",
+    "batchgeneratorsv2",
+    "matplotlib",
+    "seaborn",
+    
 ]
 
 [project.scripts]
-psma-segmentator = "psma_segmentator.cli:main"
-
-[project.urls]
-"Homepage" = "https://github.com/yourusername/psma_segmentator"
-"Repository" = "https://github.com/yourusername/psma_segmentator"
-"Bug Tracker" = "https://github.com/yourusername/psma_segmentator/issues"
+ct-segmentator = "CTSegmentator.cli:main"

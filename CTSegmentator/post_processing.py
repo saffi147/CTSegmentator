@@ -1,8 +1,15 @@
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import SimpleITK as sitk
 import numpy as np
-import os
-from tqdm import tqdm
 import pandas as pd
+from ctsegmentator.run_inference import dicom_nifti_conversion
+import tempfile
+from pathlib import Path
+import shutil
+import os
+import nibabel as nib
 
 def read_image(ct_path, pred_path):
     """
@@ -16,15 +23,73 @@ def read_image(ct_path, pred_path):
     image_prediction = sitk.ReadImage(pred_path)
     return image_CT, image_prediction
 
-def get_height(pred_file):
-    """
-    Calculate the height of the patient from the prediction file.
-    """
-    #TO DO
 
-    return height
+def compute_parameters(ct_path, pred_path):
+    """
+    Computes the volume of each segmentation, and average HU of each label. 
 
-def compute_volumes(ct_file, pred_file):
+    Args: 
+        ct_path (str): Path to the CT image.
+        pred_path (str): Path to the prediction image.
+    """
+    # load in the CT scan and segmentation
+    ct_image = sitk.ReadImage(ct_path)
+    spacing = ct_image.GetSpacing()
+    sitk_seg = sitk.ReadImage(pred_path)
+
+    # Get a numpy array from the label map image
+    npy_label = sitk.GetArrayFromImage(sitk_seg)
+    npy_ct = sitk.GetArrayFromImage(ct_image)
+
+    # Get a list of the IDs
+    label_ids = np.unique(npy_label)
+
+    label_list = []
+    volume_list = []
+    average_hu_list = []
+    stddev_hu_list = []
+
+    patient_id = Path(ct_path).name.replace('.nii.gz', '')
+
+    for i in label_ids:
+
+        #skip the background label
+        if i == 0:
+            continue
+        
+        label_mask = npy_label == i
+
+        # number of voxels
+        voxel_count = np.count_nonzero(npy_label == i)
+        # Convert to mm^3
+        volume_mm3 = voxel_count*(spacing[0]*spacing[1])
+
+        #average HU
+        hu_vals = npy_ct[label_mask]
+        average_hu = np.mean(hu_vals)
+        std_dev_hu = np.std(hu_vals)
+
+        label_list.append(i)
+        volume_list.append(volume_mm3)
+        average_hu_list.append(average_hu)
+        stddev_hu_list.append(std_dev_hu)
+    
+    # Create a DataFrame from the results
+    df = pd.DataFrame({
+        'label': label_list,
+        'volume_mm3': volume_list,
+        'average_hu': average_hu_list,
+        'std_dev_hu': stddev_hu_list
+    })
+
+    df['case'] = patient_id
+    df['spacing_x_mm'] = spacing[0]
+    df['spacing_y_mm'] = spacing[1]
+    df['spacing_z_mm'] = spacing[2]
+    
+    return df
+
+def postprocessing(ct_input, pred_dir, image_type):
     """
     Compute the volumes of the muscle and fat from the given CT and prediction files.
     
@@ -32,96 +97,73 @@ def compute_volumes(ct_file, pred_file):
         ct_file (sitk): CT image.
         pred_file (sitk): Prediction image.
     """
-    spacing = ct_file.GetSpacing()
-    # Get a numpy array from the label map image
-    npy_label = sitk.GetArrayFromImage(pred_file)
-    npy_ct = sitk.GetArrayFromImage(ct_file)
+    # setup output path 
+    ct_input = Path(ct_input)
+    pred_dir = Path(pred_dir)
 
-    # Get a list of the IDs
-    label_ids = np.unique(npy_label)
-    #print("Number of unique labels (0 is the background):")
-    #print(len(np.unique(label_ids)))
+    summary_df = []
 
-    label_list = []
-    volume_list = []
-    average_hu_list = []
-
-    for i in label_ids:
-
-        #skip the bakcground label - we dont care!
-        if i == 0:
+    # iterate over each case in the directory 
+    # this assumes the dataset is set up 
+    for case in os.listdir(ct_input):
+        case_path = os.path.join(ct_input, case)
+        if not os.path.isdir(case_path):
             continue
-        
-        label_mask = npy_label == i
+        data = os.path.join(case_path, "DATA", "DICOM")
 
-        voxel_count = np.count_nonzero(npy_label == i)
-        #print("Muscle voxel count:"+str(v1_voxel_count))
-        # Convert to mm^3
-        volume = voxel_count*(spacing[0]*spacing[1]*spacing[2])
-        #print("Muscle size mm^3: "+str(round(v1_size,2)))
+        with tempfile.TemporaryDirectory() as tmp_dir:
+        #have to make a temporary directory to save the nifti file - cannot read into a zip file directly. 
+            tmp_dir = Path(tmp_dir)
+            print(f"Temporary directory: {tmp_dir}")
 
-        #average HU
-        hu_vals = npy_ct[label_mask]
-        average_hu = np.mean(hu_vals)
+            # if input files are dicom, convert all to nifti
+            if image_type == "dicom":
+                print("Converting DICOMs to NIfTI...")
+                dicom_nifti_conversion(data, tmp_dir)
 
-        label_list.append(i)
-        volume_list.append(volume)
-        average_hu_list.append(average_hu)
+            else: 
+                # TODO
+                # adapt for nifti files
+                for file in Path(ct_input).glob("*.nii.gz"):
+                    if file.is_file():
+                        shutil.copy(file, tmp_dir)
+            
+            for ct_file in os.listdir(tmp_dir):
+                if ct_file.endswith("nii.gz"):
+                    ct_path = os.path.join(tmp_dir, ct_file)
+                    pred_path = os.path.join(pred_dir, ct_file) # assumes prediction file and ct file are named the exact same thing
+                if os.path.exists(pred_path):
+                    patient_df = compute_parameters(ct_path, pred_path)
+                else:
+                    print(f"Prediction file not found for {ct_file}") 
+                if patient_df is not None:
+                    summary_df.append(patient_df)
 
-        # Create a DataFrame from the results
-    df = pd.DataFrame({
-        'label': label_list,
-        'volume_mm3': volume_list,
-        'average_hu': average_hu_list
-    })
-
-    return df
-
-def compute_2d_smi(height):
-    """
-    Compute the skeletal muscle index (SMI) from the given height and area data.   
-    """
-
-    #TO DO
-    smi = None
-
-    return smi
+    # save df to csv
+    final_df = pd.concat(summary_df, ignore_index=True)
+    csv_path = os.path.join(output, "postprocessing_results.csv")
+    final_df.to_csv(csv_path, index=False)
+    print(f"Postprocessing results saved to: {csv_path}")
+            
 
 
-def compute_3d_smi(height, df):
-    """
-    Compute the skeletal muscle index (SMI) from the given height and volume data.
+# def compute_3d_smi(height, df):
+#     """
+#     Compute the skeletal muscle index (SMI) from the given height and volume data.
 
-    Args: 
-        height (float): Height of the patient.
-        df (pd.DataFrame): DataFrame containing the volume and HU data.
-    """
+#     Args: 
+#         height (float): Height of the patient.
+#         df (pd.DataFrame): DataFrame containing the volume and HU data.
+#     """
 
-    muscle_volume = df[df['label'] == 2]['volume_mm3'].values
+#     muscle_volume = df[df['label'] == 2]['volume_mm3'].values
 
-    smi = muscle_volume/((height)*(height))
+#     smi = muscle_volume/((height)*(height))
     
-    return smi
+#     return smi
 
-ct_path = r'xxx'
-pred_path = r'xxx'
+if __name__ == "__main__":
+    ct_path = r"/Users/saffihunt/Library/CloudStorage/OneDrive-UWA/00 THESIS/testing_CTseg/root"
+    output = r'/Users/saffihunt/Library/CloudStorage/OneDrive-UWA/00 THESIS/testing_CTseg/root_output'
 
-ct_files = [os.path.join(ct_path, f) for f in os.listdir(ct_path) if f.endswith('.nii.gz')]
-pred_files = [os.path.join(pred_path, f) for f in os.listdir(pred_path) if f.endswith('.nii.gz')]
-
-gt_dict = {os.path.basename(gt_file): gt_file for gt_file in ct_files}
-for pred_file in tqdm(pred_files, desc="Processing Files"):
-    pred_id = os.path.basename(pred_file)  # Get just the filename, assuming the file name is the patient UID
-    if pred_id in gt_dict:
-        gt_file = gt_dict[pred_id]
-    try:
-        height = get_height(pred_file)
-        volume_hu = compute_volumes(pred_file, gt_file)
-        twod_smi = compute_2d_smi(height)
-        smi_3d = compute_3d_smi(height, volume_hu)
-
-    except:
-        print('no matching ct file for pred file')
-
-        #still to do: 
-        #- save everything into one big df. 
+    postprocessing(ct_path, output, "dicom")
