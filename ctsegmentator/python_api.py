@@ -60,8 +60,6 @@ def ctsegmentator(weights_dir=r"model_weights",
         mapping.append({'new_patient_id': new_patient_id, 'original_patient_id': old_patient_id})
         i = i + 1
     
-    print(mapping)
-
     # Save mapping.csv
     mapping_file = os.path.join(output_dir, "patient_id_mapping.csv")
     with open(mapping_file, mode='w', newline='') as csvfile:

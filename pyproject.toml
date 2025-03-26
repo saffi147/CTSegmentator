@@ -16,6 +16,8 @@ dynamic_network_architectures = "*"
 batchgeneratorsv2 = "*"
 matplotlib = "*"
 seaborn = "*"
+blosc2 = "*"
+nibabel = "*"
 
 [tool.poetry.scripts]
 ct-segmentator = "ctsegmentator.cli:main"
