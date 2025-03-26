@@ -25,6 +25,7 @@ poetry update
 
 Ensure the model_weights zip file is extracted directly into the top level CTSegmentator directory ie:
 
+```
 CTSegmentator/
  ├── ctsegmentator/
  │   ├── __init__.py
@@ -44,12 +45,14 @@ CTSegmentator/
  │   ├── fold_4\
  │   │   │   ├── ...
  ...
+```
 
 
 ## Dataset structure
 
 The dataset MUST be set up with the following structure:
 
+```
 root/
  ├── Patient001/
  │   ├── DICOMDIR
@@ -64,6 +67,7 @@ root/
  │   │   │   ├── image1
  │   │   │   ├── image2
 ...
+```
 
 
 ## How to use: 
