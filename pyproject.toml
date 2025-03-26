@@ -1,28 +1,25 @@
-[build-system]
-requires = ["setuptools>=61.0"]
-build-backend = "setuptools.build_meta"
-
-[project]
-name = "CTSegmentator"
+[tool.poetry]
+name = "ctsegmentator"
 version = "0.0.1"
 description = "CT Auto-Segmentation Tool"
+authors = ["Saffi Hunt"]
 readme = "README.md"
-requires-python = ">=3.10"
-authors = [
-    { name = "Saffi Hunt" }
-]
-dependencies = [
-    "torch>=2.1.2",   
-    "pydicom",
-    "pathlib",
-    "acvl_utils",
-    "tqdm",
-    "dynamic_network_architectures",
-    "batchgeneratorsv2",
-    "matplotlib",
-    "seaborn",
-    
-]
+packages = [{ include = "ctsegmentator" }]
+  
+[tool.poetry.dependencies]
+python = ">=3.10"
+torch = ">=2.1.2"
+pydicom = "*"
+acvl_utils = "*"
+tqdm = "*"
+dynamic_network_architectures = "*"
+batchgeneratorsv2 = "*"
+matplotlib = "*"
+seaborn = "*"
 
-[project.scripts]
-ct-segmentator = "CTSegmentator.cli:main"
+[tool.poetry.scripts]
+ct-segmentator = "ctsegmentator.cli:main"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

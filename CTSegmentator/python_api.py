@@ -1,10 +1,9 @@
-import sys
 import os
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from ctsegmentator.run_inference import nnUNet_predict_image
 from pathlib import Path
+from ctsegmentator.run_inference import nnUNet_predict_image
 from importlib.metadata import version
 from ctsegmentator.post_processing import postprocessing
+import csv
 __version__ = version("CTSegmentator")
 
 def setup_ctsegmentator(weights_dir: str):
@@ -36,27 +35,35 @@ def ctsegmentator(weights_dir=r"model_weights",
     """
     setup_ctsegmentator(weights_dir)
 
+    # figure out how many cases there are
+    patient_dirs = [d for d in os.listdir(ct_dir) if os.path.isdir(os.path.join(ct_dir, d))]
+    num_patients = len(patient_dirs)
+    print(f"Number of cases found: {num_patients}")
+
+    # create map for old patient directory to new patient directory 
+    mapping = []
+
+    
+    i = 1
     for case in os.listdir(ct_dir):
         case_path = os.path.join(ct_dir, case)
         if not os.path.isdir(case_path):
             continue
         data = os.path.join(case_path, "DATA", "DICOM")
-        nnUNet_predict_image(weights_dir, data, output_dir, file_format, 
-                            device, step_size=0.5, use_tta=True, verbose=False)
-        print('Inference for available Ct scans is complete.')
+        print(f"Processing {case} ({i}/{num_patients}). Cases left: {num_patients - i}")
         
-    print("Beginning post processing...")
-    postprocessing(ct_dir, output_dir, file_format)
+        old_patient_id, new_patient_id = nnUNet_predict_image(i, weights_dir, data, output_dir, file_format, 
+                            device, step_size=0.5, use_tta=True, verbose=False)
+        mapping.append({'new_patient_id': new_patient_id, 'original_patient_id': old_patient_id})
+        i = i + 1
+    
+    print(mapping)
 
-    # post processing step
-    # input is ct_dir, output 
+    # Save mapping.csv
+    mapping_file = os.path.join(output_dir, "patient_id_mapping.csv")
+    with open(mapping_file, mode='w', newline='') as csvfile:
+        writer = csv.DictWriter(csvfile, fieldnames=['new_patient_id', 'original_patient_id'])
+        writer.writeheader()
+        writer.writerows(mapping)
 
-
-if __name__ == '__main__':
-
-
-    dir = r"/Users/saffihunt/Library/CloudStorage/OneDrive-UWA/00 THESIS/testing_CTseg/root"
-    out = r'/Users/saffihunt/Library/CloudStorage/OneDrive-UWA/00 THESIS/testing_CTseg/root_output'
-
-
-    ctsegmentator(ct_dir = dir, output_dir = out, device = "cpu", file_format="dicom")
+    print('Inference for available Ct scans is complete.')
