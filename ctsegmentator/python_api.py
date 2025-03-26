@@ -3,6 +3,7 @@ from pathlib import Path
 from ctsegmentator.run_inference import nnUNet_predict_image
 from importlib.metadata import version
 from ctsegmentator.post_processing import postprocessing
+from ctsegmentator.download_weights import download_fold_weights_via_api as dw
 import csv
 __version__ = version("CTSegmentator")
 
@@ -34,6 +35,8 @@ def ctsegmentator(weights_dir=r"model_weights",
         file_format (str): Input file format, either "dicom" or "nifti". Defaults to "dicom".
     """
     setup_ctsegmentator(weights_dir)
+
+    dw(weights_dir)
 
     # figure out how many cases there are
     patient_dirs = [d for d in os.listdir(ct_dir) if os.path.isdir(os.path.join(ct_dir, d))]
