@@ -1,4 +1,4 @@
-/home/saffihunt/Documents/ctseg_tosend/ctseg_tosend/nnunetv2name: CTSegmentator
+name: CTSegmentator
 channels:   # this is where conda looks for the packages
   - conda-forge
   - defaults

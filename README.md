@@ -7,7 +7,7 @@ Create and activate the conda environment by running the following:
 
 ```
 conda env create -f environment.yaml
-conda activate CT_segmentator
+conda activate CTSegmentator
 ```
 
 To install all dependencies into the conda environment:
