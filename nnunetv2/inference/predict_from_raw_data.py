@@ -417,13 +417,15 @@ class nnUNetPredictor(object):
                     
                 else:
                     print(f'\nDone with image of shape {data.shape}:')
-            new_name = "mask.nii.gz"
-            print(ofile)
-            original = ofile + ".nii.gz"
-            new_dir = os.path.join(os.path.dirname(original), new_name)
-            os.rename(original, new_dir)
+            
             
             ret = [i.get()[0] for i in r]
+        
+        new_name = "mask.nii.gz"
+        print(ofile)
+        original = ofile + ".nii.gz"
+        new_dir = os.path.join(os.path.dirname(original), new_name)
+        os.rename(original, new_dir)
 
         if isinstance(data_iterator, MultiThreadedAugmenter):
             data_iterator._finish()
