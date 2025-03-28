@@ -93,7 +93,7 @@ def download_fold_weights(github_base_url, output_dir, token, fold_numbers=[0, 1
 
     return str(output_dir)
 
-def download_fold_weights_via_api(output_dir, fold_numbers=[0, 1, 2, 3, 4], cleanup=True):
+def download_fold_weights_via_api(output_dir, token,  fold_numbers=[0, 1, 2, 3, 4], cleanup=True):
     """
     Downloads and extracts pre-trained weights for the current software version from GitHub release assets.
 
@@ -101,13 +101,13 @@ def download_fold_weights_via_api(output_dir, fold_numbers=[0, 1, 2, 3, 4], clea
         output_dir (str): The directory where the extracted files should be saved.
         fold_numbers (list): List of fold numbers to download (e.g., [0, 1, 2, 3, 4]).
         cleanup (bool): Whether to delete the downloaded zip files after extraction. Defaults to True.
+        token (str): PAT for github repo
 
     Returns:
         str: Path to the directory containing the complete folder structure.
     """
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
-    token = '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'
     github_repo = "saffi147/CTSegmentator"
     current_version = __version__
 

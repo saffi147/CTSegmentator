@@ -20,6 +20,7 @@ def setup_ctsegmentator(weights_dir: str):
 
 
 def ctsegmentator(weights_dir=r"model_weights", 
+                     token = None,
                      ct_dir = None,
                      output_dir=None, 
                      device="cpu",
@@ -36,7 +37,7 @@ def ctsegmentator(weights_dir=r"model_weights",
     """
     setup_ctsegmentator(weights_dir)
 
-    dw(weights_dir)
+    dw(weights_dir, token)
 
     # figure out how many cases there are
     patient_dirs = [d for d in os.listdir(ct_dir) if os.path.isdir(os.path.join(ct_dir, d))]
