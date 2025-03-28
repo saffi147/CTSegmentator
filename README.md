@@ -3,6 +3,13 @@ Package for the automatic segmentation of CT images using AI.
 
 ## Installation Instructions
 
+Clone the github repository by running the following: 
+
+```
+git clone https://github.com/saffi147/CTSegmentator.git
+cd CTSegmentator
+```
+
 Create and activate the conda environment by running the following:
 
 ```
