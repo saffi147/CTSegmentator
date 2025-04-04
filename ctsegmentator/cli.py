@@ -7,7 +7,7 @@ if __name__ == "__main__":
     parser.add_argument("-p", "--personal_access_token", required = True, help= "github PAT")
     parser.add_argument("-o", "--output_dir", required=True, help="Directory to save segmentation results")
     parser.add_argument("-f", "--file_format", choices=["dicom", "nifti"], required=True, help="Input file format")
-    parser.add_argument("-d", "--device", choices=["cpu", "gpu"], required = True, help = "Device to use for processing")
+    parser.add_argument("-d", "--device", choices=["cpu", "cuda"], required = True, help = "Device to use for processing")
     args = parser.parse_args()
 
     ctsegmentator(ct_dir = args.input_dir, token = args.personal_access_token, output_dir = args.output_dir, device = args.device, file_format= args.file_format)
