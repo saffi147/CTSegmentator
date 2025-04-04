@@ -54,6 +54,6 @@ root/
 
 Run the following from the CTSegmentator directory: 
 ```
-python -m ctsegmentator.cli -i [path to input directory] -p [github personal access token] -o [path to output directory] -f "dicom" -d "cpu"
+python -m ctsegmentator.cli -i [path to input directory] -p [github personal access token] -o [path to output directory] -f "dicom" -d ["cpu", "cuda"]
 
 ```
