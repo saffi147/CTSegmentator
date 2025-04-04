@@ -57,3 +57,27 @@ Run the following from the CTSegmentator directory:
 python -m ctsegmentator.cli -i [path to input directory] -p [github personal access token] -o [path to output directory] -f "dicom" -d ["cpu", "cuda"]
 
 ```
+
+
+## Output:
+
+CTSegmentator de-identifies input dicom and NIfTI CT scans, and saves the model derived segmentations into the following file structure: 
+
+```
+Output_folder/
+ ├── Patient001/
+ │   ├── ct_scan.nii.gz
+ │   ├── mask.nii.gz
+ ├── Patient002/
+ │   ├── ct_scan.nii.gz
+ │   ├── mask.nii.gz
+ ...
+ ├──dataset.json
+ ├──plans.json
+ ├──predict_from_raw_data_args.json
+ ├──patient_id_mapping.csv
+```
+
+Json files in the output folder are copied over from the trained nnU-Net model. 
+
+`patient_id_mapping.csv` contains the original naming convention of input files, mapped to the new patient id's assigned during processing. 
